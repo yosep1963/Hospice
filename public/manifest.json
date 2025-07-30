@@ -1,0 +1,9 @@
+{
+  "name": "호스피스 연명의료 챗봇",
+  "short_name": "호스피스챗봇",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "연명의료결정제도에 대해 의료진이 질문하면 답변해주는 챗봇입니다.",
+  "icons": []
+}
