@@ -1,0 +1,404 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  background-color: #f8fafc;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Base component styles */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200;
+  }
+}
+
+/* Chat Interface Styles */
+.chat-container {
+  @apply flex flex-col h-full;
+}
+
+.chat-header {
+  @apply flex items-center justify-between p-4 bg-white border-b border-gray-200 shadow-sm;
+}
+
+.chat-messages {
+  @apply flex-1 overflow-y-auto p-4 space-y-4;
+  scroll-behavior: smooth;
+}
+
+.chat-input-container {
+  @apply p-4 bg-white border-t border-gray-200;
+}
+
+/* Message Bubble Styles */
+.message-bubble {
+  @apply max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl p-3 rounded-2xl;
+}
+
+.message-bubble.user {
+  @apply bg-blue-600 text-white ml-auto;
+}
+
+.message-bubble.bot {
+  @apply bg-white text-gray-900 border border-gray-200;
+}
+
+.message-bubble.user .message-content {
+  @apply text-right;
+}
+
+.message-bubble.bot .message-content {
+  @apply text-left;
+}
+
+.message-timestamp {
+  @apply text-xs opacity-75 mt-2;
+}
+
+.message-bubble.user .message-timestamp {
+  @apply text-blue-100;
+}
+
+.message-bubble.bot .message-timestamp {
+  @apply text-gray-500;
+}
+
+/* Typing Indicator Styles */
+.typing-indicator {
+  @apply flex items-center space-x-2 p-3 bg-gray-100 rounded-2xl max-w-xs;
+}
+
+.typing-dots {
+  @apply flex space-x-1;
+}
+
+.typing-dot {
+  @apply w-2 h-2 bg-gray-500 rounded-full animate-pulse;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+/* Chat Input Styles */
+.chat-input {
+  @apply flex items-end space-x-3;
+}
+
+.chat-input-field {
+  @apply flex-1 min-h-[2.5rem] max-h-32 px-4 py-2 border border-gray-300 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.chat-input-button {
+  @apply p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Document Viewer Styles */
+.document-viewer-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+}
+
+.document-viewer-modal {
+  @apply bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col;
+}
+
+.document-viewer-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.document-viewer-content {
+  @apply flex-1 overflow-auto p-4;
+}
+
+.document-viewer-footer {
+  @apply flex items-center justify-end space-x-3 p-4 border-t border-gray-200;
+}
+
+/* PWA Install Prompt Styles */
+.pwa-install-prompt {
+  @apply fixed bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-40;
+}
+
+.pwa-install-content {
+  @apply flex items-start space-x-3;
+}
+
+.pwa-install-icon {
+  @apply flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center;
+}
+
+.pwa-install-text {
+  @apply flex-1 min-w-0;
+}
+
+.pwa-install-title {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.pwa-install-description {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+.pwa-install-actions {
+  @apply flex items-center space-x-2 mt-3;
+}
+
+/* Document Upload Styles */
+.document-upload-zone {
+  @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors duration-200;
+}
+
+.document-upload-zone.drag-over {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.document-list {
+  @apply space-y-3;
+}
+
+.document-item {
+  @apply flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200;
+}
+
+.document-icon {
+  @apply flex-shrink-0 w-8 h-8 text-gray-500;
+}
+
+.document-info {
+  @apply flex-1 min-w-0;
+}
+
+.document-name {
+  @apply text-sm font-medium text-gray-900 truncate;
+}
+
+.document-meta {
+  @apply text-xs text-gray-500;
+}
+
+.document-actions {
+  @apply flex items-center space-x-2;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+}
+
+/* Error States */
+.error-message {
+  @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg;
+}
+
+.success-message {
+  @apply bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg;
+}
+
+.warning-message {
+  @apply bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg;
+}
+
+.info-message {
+  @apply bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .chat-messages {
+    @apply px-3;
+  }
+
+  .message-bubble {
+    @apply max-w-[85%];
+  }
+
+  .chat-input-container {
+    @apply px-3;
+  }
+
+  .document-viewer-modal {
+    @apply max-w-full h-full rounded-none;
+  }
+
+  .pwa-install-prompt {
+    @apply left-2 right-2 bottom-2;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    @apply bg-gray-900;
+  }
+
+  .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .chat-header {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .chat-input-container {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .message-bubble.bot {
+    @apply bg-gray-800 text-white border-gray-700;
+  }
+
+  .message-bubble.bot .message-timestamp {
+    @apply text-gray-400;
+  }
+
+  .document-viewer-modal {
+    @apply bg-gray-800;
+  }
+
+  .document-viewer-header {
+    @apply border-gray-700;
+  }
+
+  .document-viewer-footer {
+    @apply border-gray-700;
+  }
+
+  .pwa-install-prompt {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .pwa-install-title {
+    @apply text-white;
+  }
+
+  .pwa-install-description {
+    @apply text-gray-400;
+  }
+
+  .document-item {
+    @apply bg-gray-700;
+  }
+
+  .document-name {
+    @apply text-white;
+  }
+
+  .document-meta {
+    @apply text-gray-400;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot,
+  .loading-spinner {
+    animation: none;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus indicators */
+.focus-visible:focus {
+  @apply outline-2 outline-blue-500 outline-offset-2;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .message-bubble.user {
+    @apply bg-blue-800;
+  }
+
+  .message-bubble.bot {
+    @apply border-2 border-gray-800;
+  }
+}
