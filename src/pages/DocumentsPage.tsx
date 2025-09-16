@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Document, SearchFilters } from '../types';
+import { Document } from '../types';
 import { DocumentProcessor } from '../utils/documentProcessor';
 import DocumentViewer from '../components/DocumentViewer';
 import {
   Upload,
   Search,
-  Filter,
   FileText,
   Download,
   Eye,
@@ -30,7 +29,7 @@ const DocumentsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filters, setFilters] = useState<SearchFilters>({});
+  // const [filters, setFilters] = useState<SearchFilters>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
@@ -89,7 +88,7 @@ const DocumentsPage: React.FC = () => {
           comparison = a.name.localeCompare(b.name);
           break;
         case 'date':
-          comparison = new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime();
+          comparison = new Date(a.uploadDate || a.createdAt).getTime() - new Date(b.uploadDate || b.createdAt).getTime();
           break;
         case 'size':
           comparison = a.size - b.size;
@@ -107,7 +106,7 @@ const DocumentsPage: React.FC = () => {
     const uploadPromises = Array.from(files).map(async (file) => {
       try {
         const uploadResponse = await DocumentProcessor.uploadDocument(file);
-        return uploadResponse.document;
+        return uploadResponse.document || uploadResponse.data;
       } catch (error) {
         console.error(`Error uploading ${file.name}:`, error);
         throw error;
@@ -116,7 +115,8 @@ const DocumentsPage: React.FC = () => {
 
     try {
       const uploadedDocs = await Promise.all(uploadPromises);
-      setDocuments(prev => [...uploadedDocs, ...prev]);
+      const validDocs = uploadedDocs.filter(doc => doc !== undefined) as Document[];
+      setDocuments(prev => [...validDocs, ...prev]);
     } catch (error) {
       setError('Some files failed to upload. Please try again.');
     } finally {
@@ -185,7 +185,7 @@ const DocumentsPage: React.FC = () => {
       <div className="document-info">
         <div className="document-name">{document.name}</div>
         <div className="document-meta">
-          {formatFileSize(document.size)} " {formatDate(document.uploadDate)}
+          {formatFileSize(document.size)} â€¢ {formatDate(new Date(document.uploadDate || document.createdAt))}
           {document.category && (
             <span className="ml-2 bg-gray-200 px-2 py-1 rounded text-xs">
               {document.category}
@@ -357,7 +357,7 @@ const DocumentsPage: React.FC = () => {
               className="ml-2 text-red-800 hover:text-red-900"
               aria-label="Dismiss error"
             >
-              ×
+              ï¿½
             </button>
           </div>
         )}
