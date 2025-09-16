@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import ChatInterface from '../components/ChatInterface';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { Message } from '../types';
-import { MessageSquare, Users, FileText, Settings } from 'lucide-react';
+import { MessageSquare, Users, FileText } from 'lucide-react';
 
 const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();

@@ -34,7 +34,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // Start with a welcome message
       setMessages([{
         id: 'welcome',
-        content: "Hello! I'm your hospice care assistant. I'm here to help answer questions about hospice care, pain management, emotional support, and any documents you might have. How can I assist you today?",
+        content: "안녕하세요! 저는 호스피스 케어 어시스턴트입니다. 🏥\n\n다음과 같은 도움을 드릴 수 있습니다:\n• 호스피스 케어 정보 제공\n• 통증 관리 방법 안내\n• 사전연명의료의향서 관련 상담\n• 정서적 지원 및 상담\n• 문서 관리 및 검색\n\n어떤 것이 궁금하신가요?",
         sender: 'bot',
         timestamp: new Date(),
         type: 'text'
@@ -62,6 +62,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
+
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       content,
@@ -88,9 +90,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: content,
+          message: content.trim(),
           sessionId: sessionId || `session-${Date.now()}`,
-          history: messages
+          history: messages.slice(-10) // 최근 10개 메시지만 전송
         }),
         signal: abortControllerRef.current.signal
       });
@@ -109,7 +111,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         type: 'text',
         metadata: {
           confidence: chatResponse.confidence,
-          sources: chatResponse.sources?.map(doc => doc.name),
+          sources: chatResponse.sources?.map(doc => doc.name) || [],
         }
       };
 
@@ -129,14 +131,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        content: 'I apologize, but I encountered an error while processing your message. Please try again.',
+        content: '죄송합니다. 메시지 처리 중 오류가 발생했습니다. 다시 시도해 주세요.',
         sender: 'bot',
         timestamp: new Date(),
         type: 'text'
       };
 
       setMessages(prev => [...prev, errorMessage]);
-      setError('Failed to send message. Please try again.');
+      setError('메시지 전송에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setIsTyping(false);
       abortControllerRef.current = null;
@@ -233,7 +235,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             className="ml-2 text-red-800 hover:text-red-900"
             aria-label="Dismiss error"
           >
-            �
+            �
           </button>
         </div>
       )}

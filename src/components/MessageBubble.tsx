@@ -4,7 +4,6 @@ import { Copy, RotateCcw, ExternalLink } from 'lucide-react';
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
-  isLast = false,
   showAvatar = true,
   onRetry,
   className = ''

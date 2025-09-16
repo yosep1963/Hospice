@@ -1,0 +1,56 @@
+{
+  "name": "Hospice Care Assistant",
+  "short_name": "HospiceChat",
+  "description": "AI-powered hospice care support and information assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "health", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Chat",
+      "short_name": "Chat",
+      "description": "Start a new chat session",
+      "url": "/",
+      "icons": [{ "src": "/chat-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "View Documents",
+      "short_name": "Documents",
+      "description": "Access hospice care documents",
+      "url": "/documents",
+      "icons": [{ "src": "/docs-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

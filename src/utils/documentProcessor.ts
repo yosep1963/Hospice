@@ -178,7 +178,7 @@ export class DocumentProcessor {
         throw new Error(`Failed to delete document: ${response.statusText}`);
       }
 
-      const result: APIResponse = await response.json();
+      const result: APIResponse<any> = await response.json();
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to delete document');
@@ -192,9 +192,9 @@ export class DocumentProcessor {
   /**
    * Downloads a document
    */
-  static async downloadDocument(document: Document): Promise<void> {
+  static async downloadDocument(doc: Document): Promise<void> {
     try {
-      const response = await fetch(`/api/documents/${document.id}/download`);
+      const response = await fetch(`/api/documents/${doc.id}/download`);
 
       if (!response.ok) {
         throw new Error(`Download failed: ${response.statusText}`);
@@ -204,7 +204,7 @@ export class DocumentProcessor {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = document.name;
+      link.download = doc.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
