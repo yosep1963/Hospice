@@ -1,0 +1,83 @@
+# 호스피스 챗봇 설정 파일
+# 이 파일을 수정하여 챗봇의 동작을 커스터마이징할 수 있습니다.
+
+# 데이터 및 모델 설정
+data:
+  # 문서 파일이 저장된 디렉토리
+  data_dir: "data"
+
+  # 벡터 데이터베이스 저장 디렉토리
+  vector_db_dir: "vector_db"
+
+# LLM 설정
+llm:
+  # Ollama 모델 이름
+  # 옵션: qwen2.5:7b, qwen2.5:14b, qwen2.5:32b
+  model_name: "qwen2.5:14b"
+
+  # Ollama 서버 URL
+  base_url: "http://localhost:11434"
+
+  # 생성 파라미터
+  temperature: 0.3  # 0.0-1.0, 낮을수록 보수적
+  top_p: 0.9        # 0.0-1.0
+  top_k: 40         # 토큰 샘플링 수
+
+# RAG 설정
+rag:
+  # 검색할 문서 청크 개수
+  top_k: 3
+
+  # 문서 청크 크기
+  chunk_size: 1000
+
+  # 청크 간 중복 크기
+  chunk_overlap: 200
+
+# 임베딩 설정
+embeddings:
+  # 임베딩 모델 이름
+  # 옵션: BAAI/bge-m3, BAAI/bge-large-zh-v1.5
+  model_name: "BAAI/bge-m3"
+
+  # 디바이스 (auto: 자동 감지, cuda, cpu)
+  device: "auto"
+
+  # 정규화 여부
+  normalize: true
+
+# 웹 UI 설정
+web:
+  # 서버 호스트 (0.0.0.0 = 모든 네트워크 인터페이스, 127.0.0.1 = 로컬만)
+  server_name: "127.0.0.1"
+
+  # 서버 포트
+  server_port: 7860
+
+  # 외부 공유 (Gradio share)
+  share: false
+
+  # 채팅 인터페이스 높이 (픽셀)
+  chatbot_height: 500
+
+# 로깅 설정
+logging:
+  # 로그 레벨: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # 로그 저장 디렉토리
+  log_dir: "logs"
+
+  # 콘솔 출력 여부
+  console_output: true
+
+# 성능 설정
+performance:
+  # GPU 메모리 최적화 (실험적)
+  optimize_gpu_memory: false
+
+  # 배치 처리 크기 (임베딩)
+  batch_size: 32
+
+  # 벡터 DB 캐시 활성화
+  enable_cache: true
