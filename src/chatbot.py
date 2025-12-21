@@ -4,7 +4,7 @@
 """
 
 import os
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Generator
 from document_loader import DocumentLoader
 from embeddings import EmbeddingManager
 from rag_pipeline import RAGPipeline
@@ -19,7 +19,8 @@ class HospiceChatbot:
         data_dir: str = "data",
         vector_db_dir: str = "vector_db",
         model_name: str = "qwen2.5:14b",
-        log_level: str = "INFO"
+        log_level: str = "INFO",
+        config=None
     ):
         """
         Args:
@@ -27,10 +28,12 @@ class HospiceChatbot:
             vector_db_dir: 벡터 DB 디렉토리
             model_name: Ollama 모델 이름
             log_level: 로깅 레벨 (DEBUG, INFO, WARNING, ERROR)
+            config: AppConfig 객체 (설정 파일에서 로드)
         """
         self.data_dir = data_dir
         self.vector_db_dir = vector_db_dir
         self.model_name = model_name
+        self.config = config
 
         self.vectorstore = None
         self.rag_pipeline = None
@@ -83,7 +86,11 @@ class HospiceChatbot:
 
             # 3. RAG 파이프라인 초기화
             self.logger.info(f"RAG 파이프라인 초기화 (모델: {self.model_name})")
-            self.rag_pipeline = RAGPipeline(self.vectorstore, self.model_name)
+            self.rag_pipeline = RAGPipeline(
+                self.vectorstore,
+                config=self.config,
+                model_name=self.model_name
+            )
 
             print("\n" + "="*60)
             print("[OK] 챗봇 초기화 완료!")
@@ -126,8 +133,11 @@ class HospiceChatbot:
 
             self.logger.info(f"질문 수신: {message[:50]}...")
 
-            # RAG 파이프라인으로 응답 생성
-            response = self.rag_pipeline.query_with_sources(message)
+            # RAG 파이프라인으로 응답 생성 (대화 히스토리 전달)
+            response = self.rag_pipeline.query_with_sources(
+                message,
+                history=self.chat_history[-3:] if self.chat_history else None
+            )
 
             # 채팅 히스토리에 추가
             self.chat_history.append((message, response))
@@ -141,6 +151,47 @@ class HospiceChatbot:
         except Exception as e:
             self.logger.error(f"응답 생성 중 오류: {e}", exc_info=True)
             return f"죄송합니다. 응답 생성 중 오류가 발생했습니다: {str(e)}"
+
+    def chat_stream(self, message: str) -> Generator[str, None, None]:
+        """
+        스트리밍 방식으로 사용자 메시지에 대한 응답을 생성합니다.
+
+        Args:
+            message: 사용자 메시지
+
+        Yields:
+            응답 텍스트 청크
+        """
+        try:
+            if self.rag_pipeline is None:
+                error_msg = "챗봇이 초기화되지 않았습니다. initialize()를 먼저 호출하세요."
+                self.logger.error(error_msg)
+                yield f"오류: {error_msg}"
+                return
+
+            if not message or not message.strip():
+                self.logger.warning("빈 메시지 수신")
+                yield "질문을 입력해주세요."
+                return
+
+            self.logger.info(f"스트리밍 질문 수신: {message[:50]}...")
+
+            # RAG 파이프라인으로 스트리밍 응답 생성
+            final_response = ""
+            for partial_response in self.rag_pipeline.query_stream(
+                message,
+                history=self.chat_history[-3:] if self.chat_history else None
+            ):
+                final_response = partial_response
+                yield partial_response
+
+            # 채팅 히스토리에 추가
+            self.chat_history.append((message, final_response))
+            self.logger.info(f"스트리밍 응답 완료 ({len(final_response)}자)")
+
+        except Exception as e:
+            self.logger.error(f"스트리밍 응답 생성 중 오류: {e}", exc_info=True)
+            yield f"죄송합니다. 응답 생성 중 오류가 발생했습니다: {str(e)}"
 
     def get_chat_history(self) -> List[Tuple[str, str]]:
         """
@@ -167,9 +218,18 @@ class HospiceChatbot:
         self.vectorstore = embedding_manager.create_vectorstore(split_docs)
 
         # RAG 파이프라인 재초기화
-        self.rag_pipeline = RAGPipeline(self.vectorstore, self.model_name)
+        self.rag_pipeline = RAGPipeline(
+            self.vectorstore,
+            config=self.config,
+            model_name=self.model_name
+        )
 
         print("벡터 스토어 재구성 완료!")
+
+    def clear_cache(self):
+        """RAG 파이프라인 캐시를 초기화합니다."""
+        if self.rag_pipeline:
+            self.rag_pipeline.clear_cache()
 
 
 def main():

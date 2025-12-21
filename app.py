@@ -29,12 +29,16 @@ def initialize_chatbot():
         print(f"[OK] 설정 파일 로드 완료")
         print(f"[OK] 모델: {config.llm.model_name}")
         print(f"[OK] 디바이스: {config.embeddings.device}")
+        print(f"[OK] Temperature: {config.llm.temperature}")
+        print(f"[OK] Top-K 검색: {config.rag.top_k}")
+        print(f"[OK] 캐시: {'활성화' if config.performance.enable_cache else '비활성화'}")
 
         chatbot = HospiceChatbot(
             data_dir=config.data.data_dir,
             vector_db_dir=config.data.vector_db_dir,
             model_name=config.llm.model_name,
-            log_level=config.logging.level
+            log_level=config.logging.level,
+            config=config  # 전체 설정 전달
         )
 
         success = chatbot.initialize()
@@ -46,7 +50,42 @@ def initialize_chatbot():
 
 def chat_response(message, history):
     """
-    Gradio 채팅 인터페이스용 응답 함수
+    Gradio 채팅 인터페이스용 스트리밍 응답 함수
+
+    Args:
+        message: 사용자 메시지
+        history: 대화 히스토리
+
+    Yields:
+        업데이트된 대화 히스토리 (스트리밍)
+    """
+    global chatbot
+
+    if chatbot is None:
+        initialize_chatbot()
+
+    try:
+        # Gradio Chatbot 형식: [[user_msg, bot_msg], ...]
+        history = history or []
+        history.append([message, ""])
+
+        # 스트리밍 응답 생성
+        for partial_response in chatbot.chat_stream(message):
+            history[-1][1] = partial_response
+            yield history
+
+    except Exception as e:
+        history = history or []
+        if len(history) > 0 and history[-1][0] == message:
+            history[-1][1] = f"오류가 발생했습니다: {str(e)}"
+        else:
+            history.append([message, f"오류가 발생했습니다: {str(e)}"])
+        yield history
+
+
+def chat_response_sync(message, history):
+    """
+    Gradio 채팅 인터페이스용 동기 응답 함수 (스트리밍 미지원 시 대체용)
 
     Args:
         message: 사용자 메시지
@@ -62,7 +101,6 @@ def chat_response(message, history):
 
     try:
         response = chatbot.chat(message)
-        # Gradio Chatbot 형식: [[user_msg, bot_msg], ...]
         history = history or []
         history.append([message, response])
         return history

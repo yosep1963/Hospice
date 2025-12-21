@@ -34,6 +34,12 @@ rag:
   # 청크 간 중복 크기
   chunk_overlap: 200
 
+  # 검색 유형: "similarity" (기본) 또는 "mmr" (다양성 검색)
+  search_type: "mmr"
+
+  # MMR 다양성 파라미터 (0.0-1.0, 높을수록 다양성 증가)
+  mmr_lambda: 0.5
+
 # 임베딩 설정
 embeddings:
   # 임베딩 모델 이름

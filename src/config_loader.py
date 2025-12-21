@@ -32,6 +32,8 @@ class RAGConfig:
     top_k: int = 3
     chunk_size: int = 1000
     chunk_overlap: int = 200
+    search_type: str = "similarity"  # "similarity" 또는 "mmr"
+    mmr_lambda: float = 0.5  # MMR 다양성 파라미터 (0.0-1.0)
 
 
 @dataclass

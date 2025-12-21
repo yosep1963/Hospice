@@ -3,7 +3,9 @@ RAG 파이프라인 모듈
 검색된 문서를 기반으로 LLM이 답변을 생성하도록 관리합니다.
 """
 
-from typing import List, Dict
+import hashlib
+from typing import List, Dict, Tuple, Optional, Generator
+from collections import OrderedDict
 from langchain.schema import Document
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
@@ -11,25 +13,58 @@ from langchain.chains import RetrievalQA
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
+from constants import (
+    DEFAULT_UNKNOWN, DEFAULT_CACHE_SIZE,
+    SOURCES_HEADER, SOURCES_SEPARATOR
+)
+
 
 class RAGPipeline:
     """RAG 파이프라인 클래스"""
 
-    def __init__(self, vectorstore, model_name: str = "qwen2.5:14b"):
+    def __init__(self, vectorstore, config=None, model_name: str = "qwen2.5:14b"):
         """
         Args:
             vectorstore: Chroma 벡터 스토어
-            model_name: Ollama 모델 이름
+            config: AppConfig 객체 (설정 파일에서 로드)
+            model_name: Ollama 모델 이름 (config가 없을 때 사용)
         """
         self.vectorstore = vectorstore
-        self.model_name = model_name
+        self.config = config
+
+        # 설정에서 값 가져오기 (config 우선, 없으면 기본값)
+        if config:
+            self.model_name = config.llm.model_name
+            self.temperature = config.llm.temperature
+            self.base_url = config.llm.base_url
+            self.top_k = config.rag.top_k
+            self.cache_enabled = config.performance.enable_cache
+            self.search_type = getattr(config.rag, 'search_type', 'similarity')
+            self.mmr_lambda = getattr(config.rag, 'mmr_lambda', 0.5)
+        else:
+            self.model_name = model_name
+            self.temperature = 0.3
+            self.base_url = "http://localhost:11434"
+            self.top_k = 3
+            self.cache_enabled = True
+            self.search_type = 'similarity'
+            self.mmr_lambda = 0.5
+
+        # 캐시 초기화
+        self._cache: OrderedDict = OrderedDict()
+        self._max_cache_size = DEFAULT_CACHE_SIZE
 
         # Ollama LLM 초기화
-        print(f"Ollama 모델 '{model_name}' 초기화 중...")
+        print(f"Ollama 모델 '{self.model_name}' 초기화 중...")
+        print(f"  - Temperature: {self.temperature}")
+        print(f"  - Top-K 검색: {self.top_k}")
+        print(f"  - 캐시: {'활성화' if self.cache_enabled else '비활성화'}")
+
         self.llm = Ollama(
-            model=model_name,
-            temperature=0.1,  # 낮은 온도로 일관된 답변 생성
-            num_ctx=4096,  # 컨텍스트 윈도우 크기
+            model=self.model_name,
+            base_url=self.base_url,
+            temperature=self.temperature,
+            num_ctx=4096,
         )
         print("LLM 초기화 완료!")
 
@@ -65,6 +100,40 @@ class RAGPipeline:
             input_variables=["context", "question"]
         )
 
+    def _get_cache_key(self, question: str) -> str:
+        """질문에 대한 캐시 키를 생성합니다."""
+        return hashlib.md5(question.strip().lower().encode()).hexdigest()
+
+    def _get_retriever(self):
+        """검색 유형에 따른 retriever를 반환합니다."""
+        if self.search_type == "mmr":
+            return self.vectorstore.as_retriever(
+                search_type="mmr",
+                search_kwargs={
+                    "k": self.top_k,
+                    "lambda_mult": self.mmr_lambda
+                }
+            )
+        return self.vectorstore.as_retriever(
+            search_kwargs={"k": self.top_k}
+        )
+
+    def _enhance_question_with_history(self, question: str, history: Optional[List[Tuple[str, str]]] = None) -> str:
+        """대화 히스토리를 활용하여 질문을 확장합니다."""
+        if history and len(history) > 0:
+            recent_questions = [q for q, a in history[-2:]]
+            return " ".join(recent_questions) + " " + question
+        return question
+
+    def _format_context(self, documents: List[Document]) -> str:
+        """검색된 문서들을 컨텍스트 문자열로 변환합니다."""
+        return "\n\n".join([doc.page_content for doc in documents])
+
+    def _format_sources(self, documents: List[Document]) -> str:
+        """문서 출처를 포맷팅된 문자열로 반환합니다."""
+        sources = set([doc.metadata.get("source", DEFAULT_UNKNOWN) for doc in documents])
+        return SOURCES_HEADER + SOURCES_SEPARATOR.join(sources)
+
     def create_qa_chain(self):
         """
         질의응답 체인을 생성합니다.
@@ -72,9 +141,7 @@ class RAGPipeline:
         Returns:
             RetrievalQA 체인
         """
-        retriever = self.vectorstore.as_retriever(
-            search_kwargs={"k": 4}  # 상위 4개 문서 검색
-        )
+        retriever = self._get_retriever()
 
         qa_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
@@ -86,58 +153,108 @@ class RAGPipeline:
 
         return qa_chain
 
-    def query(self, question: str) -> Dict:
+    def _retrieve_documents(self, question: str) -> List[Document]:
+        """문서를 검색합니다. MMR 또는 similarity 검색 사용."""
+        if self.search_type == "mmr":
+            return self.vectorstore.max_marginal_relevance_search(
+                question, k=self.top_k, lambda_mult=self.mmr_lambda
+            )
+        return self.vectorstore.similarity_search(question, k=self.top_k)
+
+    def query(self, question: str, history: Optional[List[Tuple[str, str]]] = None) -> Dict:
         """
         질문에 대한 답변을 생성합니다.
 
         Args:
             question: 사용자 질문
+            history: 대화 히스토리 (선택사항)
 
         Returns:
             답변 및 출처 정보를 포함한 딕셔너리
         """
+        # 캐시 확인
+        if self.cache_enabled:
+            cache_key = self._get_cache_key(question)
+            if cache_key in self._cache:
+                print("[캐시] 캐시된 응답 사용")
+                return self._cache[cache_key]
+
+        # 대화 컨텍스트를 활용한 쿼리 확장
+        enhanced_question = self._enhance_question_with_history(question, history)
+
         # 검색된 문서 가져오기
-        retrieved_docs = self.vectorstore.similarity_search(question, k=4)
+        retrieved_docs = self._retrieve_documents(enhanced_question)
 
-        # 컨텍스트 구성
-        context = "\n\n".join([doc.page_content for doc in retrieved_docs])
-
-        # 프롬프트 생성
-        prompt = self.prompt_template.format(
-            context=context,
-            question=question
-        )
+        # 컨텍스트 구성 및 프롬프트 생성
+        context = self._format_context(retrieved_docs)
+        prompt = self.prompt_template.format(context=context, question=question)
 
         # LLM으로 답변 생성
         response = self.llm.invoke(prompt)
 
-        # 결과 반환
-        return {
+        # 결과 구성
+        result = {
             "question": question,
             "answer": response,
             "source_documents": retrieved_docs
         }
 
-    def query_with_sources(self, question: str) -> str:
+        # 캐시에 저장
+        if self.cache_enabled:
+            if len(self._cache) >= self._max_cache_size:
+                self._cache.popitem(last=False)
+            self._cache[cache_key] = result
+
+        return result
+
+    def query_stream(self, question: str, history: Optional[List[Tuple[str, str]]] = None) -> Generator[str, None, None]:
+        """
+        스트리밍 방식으로 질문에 대한 답변을 생성합니다.
+
+        Args:
+            question: 사용자 질문
+            history: 대화 히스토리 (선택사항)
+
+        Yields:
+            응답 텍스트 청크
+        """
+        # 대화 컨텍스트를 활용한 쿼리 확장
+        enhanced_question = self._enhance_question_with_history(question, history)
+
+        # 검색된 문서 가져오기
+        retrieved_docs = self._retrieve_documents(enhanced_question)
+
+        # 컨텍스트 구성 및 프롬프트 생성
+        context = self._format_context(retrieved_docs)
+        prompt = self.prompt_template.format(context=context, question=question)
+
+        # 스트리밍으로 LLM 응답 생성
+        full_response = ""
+        for chunk in self.llm.stream(prompt):
+            full_response += chunk
+            yield full_response
+
+        # 출처 정보 추가
+        yield full_response + self._format_sources(retrieved_docs)
+
+    def query_with_sources(self, question: str, history: Optional[List[Tuple[str, str]]] = None) -> str:
         """
         질문에 대한 답변과 출처를 함께 반환합니다.
 
         Args:
             question: 사용자 질문
+            history: 대화 히스토리 (선택사항)
 
         Returns:
             답변 및 출처가 포함된 문자열
         """
-        result = self.query(question)
+        result = self.query(question, history=history)
+        return result["answer"] + self._format_sources(result["source_documents"])
 
-        # 답변 구성
-        answer = result["answer"]
-
-        # 출처 정보 추가
-        sources = set([doc.metadata["source"] for doc in result["source_documents"]])
-        sources_text = "\n\n📚 **참고 문서:**\n- " + "\n- ".join(sources)
-
-        return answer + sources_text
+    def clear_cache(self):
+        """캐시를 초기화합니다."""
+        self._cache.clear()
+        print("[캐시] 캐시가 초기화되었습니다.")
 
 
 def main():

@@ -9,6 +9,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 import chromadb
 
+from constants import COLLECTION_NAME
+
 
 class EmbeddingManager:
     """임베딩 및 벡터 DB 관리 클래스"""
@@ -53,7 +55,7 @@ class EmbeddingManager:
             documents=documents,
             embedding=self.embeddings,
             persist_directory=self.persist_directory,
-            collection_name="hospice_docs"
+            collection_name=COLLECTION_NAME
         )
 
         print("벡터 스토어 생성 완료!")
@@ -71,7 +73,7 @@ class EmbeddingManager:
         self.vectorstore = Chroma(
             persist_directory=self.persist_directory,
             embedding_function=self.embeddings,
-            collection_name="hospice_docs"
+            collection_name=COLLECTION_NAME
         )
 
         print("벡터 스토어 로드 완료!")
