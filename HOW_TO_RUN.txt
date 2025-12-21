@@ -1,0 +1,112 @@
+============================================================
+  HOSPICE CHATBOT - QUICK START GUIDE
+============================================================
+
+STEP 1: Run the Application
+
+   Double-click: START.bat
+
+   OR run manually:
+   1. Open Command Prompt in this folder
+   2. Type: venv\Scripts\python.exe app.py
+   3. Press Enter
+
+STEP 2: Wait for Initialization (20-30 seconds)
+
+   Wait until you see this message:
+   "Running on local URL: http://127.0.0.1:7860"
+
+STEP 3: Open Web Browser
+
+   Type in address bar:
+
+   http://localhost:7860
+
+   OR
+
+   http://127.0.0.1:7860
+
+STEP 4: Use the Chatbot!
+
+============================================================
+  IMPORTANT
+============================================================
+
+✓ Keep the black window (command prompt) open while using
+✓ Use http://localhost:7860 (NOT 0.0.0.0:7860)
+✓ Wait for initialization before connecting
+✓ Press Ctrl+C or close window to stop
+
+============================================================
+  FIRST TIME SETUP
+============================================================
+
+Before running, make sure you have:
+
+1. Python 3.9+ installed
+   Check: python --version
+
+2. Ollama installed and running
+   Check: ollama list
+   Install from: https://ollama.ai
+
+3. Virtual environment created
+   Run once: python -m venv venv
+
+4. Dependencies installed
+   Run once: venv\Scripts\pip install -r requirements.txt
+
+5. Model downloaded (about 9GB)
+   Run once: ollama pull qwen2.5:14b
+
+============================================================
+  TROUBLESHOOTING
+============================================================
+
+Problem: "Cannot connect to site"
+Solution:
+  - Ensure START.bat window is still open
+  - Use localhost:7860, not 0.0.0.0:7860
+  - Wait for "Running on local URL" message
+
+Problem: Window closes immediately
+Solution:
+  - Run manually: venv\Scripts\python.exe app.py
+  - Check for error messages
+  - Verify Python and Ollama are installed
+
+Problem: "Python not found"
+Solution:
+  - Install Python 3.9+ from python.org
+  - Add Python to PATH during installation
+
+Problem: "Ollama not found"
+Solution:
+  - Install Ollama from ollama.ai
+  - Verify it's running: ollama list
+
+============================================================
+  FILES OVERVIEW
+============================================================
+
+START.bat         - Main startup script (double-click this)
+setup.bat         - One-time setup (creates venv, installs packages)
+app.py            - Main application
+config.yaml       - Configuration settings
+requirements.txt  - Python dependencies
+
+HOW_TO_RUN.txt    - This file
+README.md         - Full project documentation
+CLAUDE.md         - Developer documentation
+setup_guide.md    - Detailed setup instructions
+
+============================================================
+  GETTING HELP
+============================================================
+
+For detailed information, see:
+- README.md (Korean) - Complete project overview
+- setup_guide.md (Korean) - Installation guide
+- CLAUDE.md (English) - Technical architecture
+
+============================================================

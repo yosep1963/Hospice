@@ -1,0 +1,132 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║             HOSPICE CHATBOT - PROJECT STRUCTURE                  ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📁 CORE FILES (Essential)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+START.bat             ⭐ Main startup script (DOUBLE-CLICK THIS!)
+setup.bat               One-time setup script
+app.py                  Main application entry point
+config.yaml             Configuration file
+requirements.txt        Python dependencies
+run.sh                  Linux/Mac startup script
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📚 DOCUMENTATION (Read these!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW_TO_RUN.txt        ⭐ Quick start guide (READ THIS FIRST!)
+README.md               Full project documentation (Korean)
+CLAUDE.md               Developer/technical documentation (English)
+setup_guide.md          Detailed installation guide (Korean)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📂 DIRECTORIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+src/                    Source code
+  ├── chatbot.py          Main chatbot orchestrator
+  ├── rag_pipeline.py     RAG pipeline (retrieval + generation)
+  ├── embeddings.py       Vector embedding manager
+  ├── document_loader.py  Document loading and chunking
+  ├── config_loader.py    Configuration loader
+  └── logger.py           Logging system
+
+data/                   Source documents (7 files)
+  ├── hospice_1_1_1.md    Hospice information
+  ├── hospice_1_1_2.md
+  ├── hospice_1_2.md
+  ├── hospice_1_3.md
+  ├── hospice_2_1.txt
+  ├── hospice_2_2.txt
+  └── hospice_2_3.txt
+
+vector_db/              Vector database (auto-generated)
+logs/                   Application logs (auto-generated)
+venv/                   Python virtual environment
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔧 UTILITY SCRIPTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+init_vectordb.py        Initialize/rebuild vector database
+performance_test.py     Run performance benchmarks
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 QUICK START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. First Time Setup:
+   - Install Python 3.9+
+   - Install Ollama (https://ollama.ai)
+   - Run: setup.bat
+
+2. Run Chatbot:
+   - Double-click: START.bat
+   - Open browser: http://localhost:7860
+
+3. Stop Chatbot:
+   - Close the command prompt window
+   - Or press Ctrl+C
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 FILE PURPOSE SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For Users:
+  START.bat         → Run this to start the chatbot
+  HOW_TO_RUN.txt    → Read this for instructions
+  README.md         → Complete project information
+
+For Developers:
+  CLAUDE.md         → Technical architecture
+  app.py            → Web interface code
+  src/              → Core functionality
+  config.yaml       → Customize settings
+
+For Setup:
+  setup.bat         → Automated setup
+  setup_guide.md    → Manual setup guide
+  requirements.txt  → Python packages
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚠️ IMPORTANT NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ DO NOT delete venv/, vector_db/, or data/ folders
+✓ DO NOT modify files while chatbot is running
+✓ Use localhost:7860, NOT 0.0.0.0:7860
+✓ Keep command prompt window open while using chatbot
+
+✗ DO NOT commit logs/ folder to git
+✗ DO NOT commit vector_db/ folder to git
+✗ DO NOT share .env files (if any)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 TECHNOLOGY STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LLM:           Qwen2.5 14B Instruct (via Ollama)
+Embeddings:    BGE-M3 (multilingual, Korean-optimized)
+Vector DB:     ChromaDB
+Framework:     LangChain
+Web UI:        Gradio
+Language:      Python 3.9+
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Everything you need is documented in HOW_TO_RUN.txt            ║
+║  Just double-click START.bat to begin!                          ║
+╚══════════════════════════════════════════════════════════════════╝
